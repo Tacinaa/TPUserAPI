@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException("Un utilisateur avec cet email existe déjà");
         }
+        if (!user.getEmail().endsWith(".com")) {
+            throw new IllegalArgumentException("L'email doit se terminer par .com");
+        }
         return convertToDto(userRepository.save(user));
     }
 
@@ -47,6 +50,10 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(Long id, User user) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Utilisateur non trouvé avec l'id : " + id));
+
+        if (!user.getEmail().endsWith(".com")) {
+            throw new IllegalArgumentException("L'email doit se terminer par .com");
+        }
 
         if (!existingUser.getEmail().equals(user.getEmail()) &&
                 userRepository.existsByEmail(user.getEmail())) {
@@ -56,7 +63,6 @@ public class UserServiceImpl implements UserService {
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
         existingUser.setPassword(user.getPassword());
-
         return convertToDto(userRepository.save(existingUser));
     }
 
@@ -70,14 +76,5 @@ public class UserServiceImpl implements UserService {
 
     private UserDto convertToDto(User user) {
         return new UserDto(user.getId(), user.getName(), user.getEmail());
-    }
-
-    private User convertToEntity(UserDto dto, String password) {
-        User user = new User();
-        user.setId(dto.getId());
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(password);
-        return user;
     }
 }

@@ -72,6 +72,7 @@ class UserServiceTest {
 
         UserDto dto = userService.createUser(user);
 
+        assertEquals(1L, dto.getId());
         assertEquals("Alice", dto.getName());
         assertEquals("alice@example.com", dto.getEmail());
     }
@@ -102,6 +103,7 @@ class UserServiceTest {
 
         assertEquals("New", updated.getName());
         assertEquals("new@example.com", updated.getEmail());
+        assertEquals(1L, updated.getId());
     }
 
     @Test
@@ -142,5 +144,15 @@ class UserServiceTest {
         when(userRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(ObjectNotFoundException.class, () -> userService.deleteUser(1L));
+    }
+
+    @Test
+    void shouldThrowWhenEmailIsInvalid() {
+        User user = new User();
+        user.setName("Test");
+        user.setEmail("notvalid@domain.fr");
+        user.setPassword("1234");
+
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
     }
 }
